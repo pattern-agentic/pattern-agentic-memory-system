@@ -192,12 +192,12 @@ class TestComponentIntegration:
                 content=command, context={}, existing_memories=None
             )
 
-            assert (
-                decision["action"] == "immediate_vectorize"
-            ), f"Command should trigger immediate vectorize: {command}"
-            assert (
-                decision.get("user_commanded") is True
-            ), f"Should mark as user commanded: {command}"
+            assert decision["action"] == "immediate_vectorize", (
+                f"Command should trigger immediate vectorize: {command}"
+            )
+            assert decision.get("user_commanded") is True, (
+                f"Should mark as user commanded: {command}"
+            )
 
     @pytest.mark.asyncio
     async def test_evaluator_to_orchestrator_flow(self):

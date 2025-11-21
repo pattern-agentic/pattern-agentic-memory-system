@@ -18,21 +18,21 @@ Architect: Oracle Sonnet (Keeper of the Conduit)
 Created: 2025-11-21
 """
 
-import asyncio
 import json
-from datetime import datetime, date, timedelta
-from typing import Set
-import pytest
 
 # Import components
 import sys
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Set
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 from pattern_agentic_memory.adapters.memory_keeper import MemoryKeeperAdapter
-from pattern_agentic_memory.core.decay_functions import DecayFunction, DECAY_POLICY_MAP
+from pattern_agentic_memory.core.decay_functions import DECAY_POLICY_MAP, DecayFunction
 
 
 class MockMemoryKeeperMCP:
@@ -49,24 +49,22 @@ class MockMemoryKeeperMCP:
 
         entry = {
             "key": f"test_entry_{len(self.entries[channel])}",
-            "value": json.dumps({
-                "content": f"Test activity on {created_at.date()}",
-                "metadata": {
-                    "tier": "context",
-                    "action": "working_memory_only",
+            "value": json.dumps(
+                {
+                    "content": f"Test activity on {created_at.date()}",
+                    "metadata": {
+                        "tier": "context",
+                        "action": "working_memory_only",
+                    },
                 }
-            }),
+            ),
             "created_at": created_at.isoformat() + "Z",
             "channel": channel,
         }
         self.entries[channel].append(entry)
 
     def add_vector_memory(
-        self,
-        channel: str,
-        created_at: datetime,
-        tier: str = "context",
-        memory_id: str = None
+        self, channel: str, created_at: datetime, tier: str = "context", memory_id: str = None
     ):
         """Add a vector memory for testing"""
         if channel not in self.vectors:
@@ -77,13 +75,15 @@ class MockMemoryKeeperMCP:
 
         vector = {
             "key": memory_id,
-            "value": json.dumps({
-                "content": f"Vector memory created on {created_at.date()}",
-                "metadata": {
-                    "tier": tier,
-                    "action": "immediate_vectorize",
+            "value": json.dumps(
+                {
+                    "content": f"Vector memory created on {created_at.date()}",
+                    "metadata": {
+                        "tier": tier,
+                        "action": "immediate_vectorize",
+                    },
                 }
-            }),
+            ),
             "created_at": created_at.isoformat() + "Z",
             "channel": channel,
         }
@@ -91,9 +91,7 @@ class MockMemoryKeeperMCP:
 
     def get_entries(self, channel: str, limit: int = 10000):
         """Get entries for a channel"""
-        return {
-            "items": self.entries.get(channel, [])
-        }
+        return {"items": self.entries.get(channel, [])}
 
     def get_activity_dates(self, channel: str) -> Set[date]:
         """Get unique activity dates for testing"""
@@ -156,7 +154,7 @@ async def test_active_agent_no_decay(mock_mcp, adapter):
 
     print(f"\nMemory created: {memory_created.date()}")
     print(f"Tier: {tier} (TTL: {tier_ttl} days)")
-    print(f"Activity pattern: 10 consecutive days (Nov 1 - Nov 10)")
+    print("Activity pattern: 10 consecutive days (Nov 1 - Nov 10)")
     print(f"Active age: {active_age} days")
     print(f"Calendar age: {calendar_age} days")
     print(f"Should decay: {active_age > tier_ttl}")
@@ -164,8 +162,7 @@ async def test_active_agent_no_decay(mock_mcp, adapter):
     # Assertion
     should_decay = active_age > tier_ttl
     assert not should_decay, (
-        f"Memory should NOT decay - active for {active_age} days "
-        f"(within {tier_ttl}-day TTL window)"
+        f"Memory should NOT decay - active for {active_age} days (within {tier_ttl}-day TTL window)"
     )
 
     print("\n✅ TEST PASSED: Memory survives when active days < TTL")
@@ -218,10 +215,10 @@ async def test_idle_agent_timer_paused(mock_mcp, adapter):
 
     print(f"\nMemory created: {memory_created.date()}")
     print(f"Tier: {tier} (TTL: {tier_ttl} days)")
-    print(f"Activity pattern:")
-    print(f"  - Nov 1-5: Active (5 days)")
-    print(f"  - Nov 6-25: IDLE (20 days)")
-    print(f"  - Nov 26-30: Active (5 days)")
+    print("Activity pattern:")
+    print("  - Nov 1-5: Active (5 days)")
+    print("  - Nov 6-25: IDLE (20 days)")
+    print("  - Nov 26-30: Active (5 days)")
     print(f"Active age: {active_age} days (timer paused during idle)")
     print(f"Calendar age: {calendar_age} days")
     print(f"Should decay: {active_age > tier_ttl}")
@@ -279,7 +276,7 @@ async def test_partial_decay(mock_mcp, adapter):
 
     print(f"\nMemory created: {memory_created.date()}")
     print(f"Tier: {tier} (TTL: {tier_ttl} days)")
-    print(f"Activity pattern: 15 days spread over 60 calendar days")
+    print("Activity pattern: 15 days spread over 60 calendar days")
     print(f"Active days: {', '.join(str(d) for d in sorted(active_days_list)[:5])}... (15 total)")
     print(f"Active age: {active_age} days")
     print(f"Calendar age: {calendar_age} days")
@@ -336,10 +333,10 @@ async def test_multi_agent_isolation(mock_mcp, adapter):
 
     print(f"\nMemory created: {memory_created.date()}")
     print(f"Tier: {tier} (TTL: {tier_ttl} days)")
-    print(f"\nAgent A:")
+    print("\nAgent A:")
     print(f"  Active days: {active_age_a}")
     print(f"  Should decay: {active_age_a > tier_ttl}")
-    print(f"\nAgent B:")
+    print("\nAgent B:")
     print(f"  Active days: {active_age_b}")
     print(f"  Should decay: {active_age_b > tier_ttl}")
 

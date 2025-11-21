@@ -4,8 +4,9 @@ Setup script for pattern-agentic-memory system.
 Provides pip installation support alongside Poetry.
 """
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 # Read README for long description
 readme_path = Path(__file__).parent / "README.md"

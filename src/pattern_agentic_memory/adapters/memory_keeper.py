@@ -19,15 +19,13 @@ Extracted from adaptive_memory_integration.py as part of Pattern Agentic Memory 
 
 import hashlib
 import json
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Dict, List, Optional, Set
 
 from ..core import AdaptiveMemoryOrchestrator
 from ..core.tier_promotion import (
     calculate_expiration_with_bonus,
-    get_tier_base_ttl,
     log_promotion,
-    process_promotion_response,
     should_trigger_promotion_prompt,
     trigger_tier_promotion_prompt,
     validate_promotion,
@@ -128,7 +126,7 @@ class MemoryKeeperAdapter:
         expires_at = calculate_expiration_with_bonus(
             tier=tier_value,
             access_count=0,  # Initial save, no accesses yet
-            creation_time=created_at
+            creation_time=created_at,
         )
 
         # Build metadata (Phase 3: Add access tracking fields)
@@ -241,11 +239,7 @@ class MemoryKeeperAdapter:
             print(f"Warning: Could not fetch activity dates for {agent_id}: {e}")
             return set()
 
-    def calculate_active_age(
-        self,
-        memory_created_at: datetime,
-        activity_dates: Set[date]
-    ) -> int:
+    def calculate_active_age(self, memory_created_at: datetime, activity_dates: Set[date]) -> int:
         """
         Calculate active age of a memory (count only days with activity).
 
@@ -274,11 +268,7 @@ class MemoryKeeperAdapter:
 
     # ===== Phase 3: Access-Based TTL Extension Methods =====
 
-    async def update_access_tracking(
-        self,
-        memory_key: str,
-        agent_id: Optional[str] = None
-    ) -> Dict:
+    async def update_access_tracking(self, memory_key: str, agent_id: Optional[str] = None) -> Dict:
         """
         Update access tracking when memory is accessed.
 
@@ -325,9 +315,7 @@ class MemoryKeeperAdapter:
         tier = metadata.get("tier", "context")
         created_at = datetime.fromisoformat(metadata.get("timestamp", now.isoformat()))
         new_expires_at = calculate_expiration_with_bonus(
-            tier=tier,
-            access_count=new_access_count,
-            creation_time=created_at
+            tier=tier, access_count=new_access_count, creation_time=created_at
         )
         metadata["expires_at"] = new_expires_at.isoformat() if new_expires_at else None
 
@@ -350,7 +338,7 @@ class MemoryKeeperAdapter:
                 access_count=new_access_count,
                 created_at=created_at,
                 last_accessed=now,
-                agent_id=agent_id
+                agent_id=agent_id,
             )
 
         return {
@@ -359,14 +347,10 @@ class MemoryKeeperAdapter:
             "access_count": new_access_count,
             "last_accessed": now.isoformat(),
             "expires_at": metadata["expires_at"],
-            "promotion_prompt_triggered": should_trigger_promotion_prompt(new_access_count)
+            "promotion_prompt_triggered": should_trigger_promotion_prompt(new_access_count),
         }
 
-    async def context_get_with_tracking(
-        self,
-        key: str,
-        agent_id: Optional[str] = None
-    ) -> Dict:
+    async def context_get_with_tracking(self, key: str, agent_id: Optional[str] = None) -> Dict:
         """
         Get memory with automatic access tracking.
 
@@ -394,10 +378,7 @@ class MemoryKeeperAdapter:
         return result
 
     async def context_search_with_tracking(
-        self,
-        query: str,
-        agent_id: Optional[str] = None,
-        **kwargs
+        self, query: str, agent_id: Optional[str] = None, **kwargs
     ) -> List[Dict]:
         """
         Search memories with automatic access tracking.
@@ -430,10 +411,7 @@ class MemoryKeeperAdapter:
         return results
 
     async def promote_memory(
-        self,
-        memory_key: str,
-        new_tier: str,
-        promoted_by: str = "user"
+        self, memory_key: str, new_tier: str, promoted_by: str = "user"
     ) -> Dict:
         """
         Promote memory to a higher tier.
@@ -488,7 +466,7 @@ class MemoryKeeperAdapter:
         new_expires_at = calculate_expiration_with_bonus(
             tier=new_tier,
             access_count=0,  # Reset
-            creation_time=created_at
+            creation_time=created_at,
         )
         metadata["expires_at"] = new_expires_at.isoformat() if new_expires_at else None
 
@@ -507,7 +485,7 @@ class MemoryKeeperAdapter:
             old_tier=old_tier,
             new_tier=new_tier,
             access_count=old_access_count,
-            promoted_by=promoted_by
+            promoted_by=promoted_by,
         )
 
         return {
@@ -518,5 +496,5 @@ class MemoryKeeperAdapter:
             "access_count_reset": True,
             "old_access_count": old_access_count,
             "expires_at": metadata["expires_at"],
-            "promoted_by": promoted_by
+            "promoted_by": promoted_by,
         }

@@ -4,23 +4,25 @@ Mr. AI Evidence Validator (Platform Agnostic)
 Enforces evidence-based validation for all agent responses
 """
 
-import sys
-import re
 import json
-import yaml
-from pathlib import Path
+import re
+import sys
 from datetime import datetime, timezone
-from typing import Tuple, Dict
+from pathlib import Path
+from typing import Dict, Tuple
+
+import yaml
+
 
 class EvidenceValidator:
     """Validates agent evidence blocks against Mr. AI standards"""
 
     # Required evidence patterns
     REQUIRED_PATTERNS = {
-        'evidence_header': r'EVIDENCE\[[\w\-]+\d{4}-\d{2}-\d{2}-\d{2}:\d{2}\]:',
-        'raw_output': r'RAW OUTPUT:',
-        'test_results': r'├──.*:.*\[.*\]',
-        'stability_check': r'[3-9]/[3-9] successful|3 (identical|successful)',
+        "evidence_header": r"EVIDENCE\[[\w\-]+\d{4}-\d{2}-\d{2}-\d{2}:\d{2}\]:",
+        "raw_output": r"RAW OUTPUT:",
+        "test_results": r"├──.*:.*\[.*\]",
+        "stability_check": r"[3-9]/[3-9] successful|3 (identical|successful)",
     }
 
     # Forbidden phrases (success theater)
@@ -34,7 +36,7 @@ class EvidenceValidator:
         "looks correct",
         "seems fine",
         "should be fine",
-        "appears correct"
+        "appears correct",
     ]
 
     def __init__(self, config_path=".mr_ai/config.yaml"):
@@ -47,7 +49,7 @@ class EvidenceValidator:
         """Load framework configuration"""
         try:
             if Path(config_path).exists():
-                with open(config_path, 'r') as f:
+                with open(config_path, "r") as f:
                     return yaml.safe_load(f)
         except Exception:
             pass
@@ -75,13 +77,13 @@ class EvidenceValidator:
                 self.score -= 20
 
         # Check for external validation (unless config allows localhost-only)
-        allow_localhost = self.config.get('validation', {}).get('allow_localhost_only', False)
+        allow_localhost = self.config.get("validation", {}).get("allow_localhost_only", False)
 
         if not allow_localhost:
             # Require external IP validation
-            external_pattern = r'curl.*http[^s]?://(?!localhost|127\.0\.0\.1)'
+            external_pattern = r"curl.*http[^s]?://(?!localhost|127\.0\.0\.1)"
             if not re.search(external_pattern, content, re.IGNORECASE):
-                if 'localhost' in content.lower() or '127.0.0.1' in content:
+                if "localhost" in content.lower() or "127.0.0.1" in content:
                     self.errors.append("Only localhost testing - no external validation")
                     self.score -= 30
 
@@ -93,12 +95,12 @@ class EvidenceValidator:
                 self.score -= 25
 
         # Check for actual command output
-        if content.count('$') < 3 and content.count('#') < 3:
+        if content.count("$") < 3 and content.count("#") < 3:
             self.warnings.append("Insufficient command examples")
             self.score -= 10
 
         # Check for output length (evidence should be substantial)
-        raw_output_match = re.search(r'RAW OUTPUT:(.*)', content, re.DOTALL)
+        raw_output_match = re.search(r"RAW OUTPUT:(.*)", content, re.DOTALL)
         if raw_output_match:
             raw_output = raw_output_match.group(1)
             if len(raw_output.strip()) < 100:
@@ -116,13 +118,13 @@ class EvidenceValidator:
     def get_report(self) -> Dict:
         """Generate validation report"""
         return {
-            'valid': len(self.errors) == 0 and self.score >= 70,
-            'score': max(0, self.score),
-            'errors': self.errors,
-            'warnings': self.warnings,
-            'timestamp': datetime.now(timezone.utc).isoformat(),
-            'recommendation': self.get_recommendation(),
-            'config_loaded': bool(self.config)
+            "valid": len(self.errors) == 0 and self.score >= 70,
+            "score": max(0, self.score),
+            "errors": self.errors,
+            "warnings": self.warnings,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "recommendation": self.get_recommendation(),
+            "config_loaded": bool(self.config),
         }
 
     def get_recommendation(self) -> str:
@@ -136,6 +138,7 @@ class EvidenceValidator:
         else:
             return "🚫 Reject - likely success theater"
 
+
 def main():
     """CLI for evidence validation"""
     if len(sys.argv) < 2:
@@ -145,7 +148,7 @@ def main():
 
     validator = EvidenceValidator()
 
-    if sys.argv[1] == '--stdin':
+    if sys.argv[1] == "--stdin":
         content = sys.stdin.read()
         is_valid, report = validator.validate_content(content)
     else:
@@ -156,6 +159,7 @@ def main():
 
     # Set exit code
     sys.exit(0 if is_valid else 1)
+
 
 if __name__ == "__main__":
     main()

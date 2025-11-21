@@ -133,9 +133,9 @@ def build_promotion_prompt(
 This memory has been accessed {access_count} times and reached maximum extension (+{bonus_days} days).
 
 Memory: "{memory_key}"
-Current tier: Tier {get_tier_number(current_tier)} ({current_tier}) - {base_ttl or 'Forever'} days base + {bonus_days} day extension = {total_days} days total
-Created: {created_at.strftime('%Y-%m-%d')}
-Last accessed: {last_accessed.strftime('%Y-%m-%d')} ({accesses_per_day:.1f} accesses/day)
+Current tier: Tier {get_tier_number(current_tier)} ({current_tier}) - {base_ttl or "Forever"} days base + {bonus_days} day extension = {total_days} days total
+Created: {created_at.strftime("%Y-%m-%d")}
+Last accessed: {last_accessed.strftime("%Y-%m-%d")} ({accesses_per_day:.1f} accesses/day)
 
 Content preview:
 "{preview}"
@@ -272,9 +272,9 @@ def notify_user(prompt: str, agent_id: Optional[str] = None) -> None:
     For now: Log to console/file.
     """
     logger.warning(f"[USER PROMPT] {prompt}")
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(prompt)
-    print(f"{'='*80}\n")
+    print(f"{'=' * 80}\n")
 
 
 def notify_agent(prompt: str, agent_id: str) -> None:

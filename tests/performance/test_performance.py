@@ -88,9 +88,9 @@ class TestSingleEvaluationPerformance:
 
         elapsed_ms = (time.time() - start) * 1000
 
-        assert (
-            elapsed_ms < 50
-        ), f"Evaluation with existing memories took {elapsed_ms:.2f}ms (target: <50ms)"
+        assert elapsed_ms < 50, (
+            f"Evaluation with existing memories took {elapsed_ms:.2f}ms (target: <50ms)"
+        )
         assert decision is not None
 
     @pytest.mark.asyncio
@@ -215,9 +215,9 @@ class TestBatchThroughputPerformance:
         print(f"  Time: {elapsed:.2f}s")
         print(f"  Throughput: {throughput:.1f} memories/sec")
 
-        assert (
-            throughput > 100
-        ), f"Mixed batch throughput {throughput:.1f}/sec below target (>100/sec)"
+        assert throughput > 100, (
+            f"Mixed batch throughput {throughput:.1f}/sec below target (>100/sec)"
+        )
 
 
 class TestMemoryFootprint:
@@ -256,9 +256,9 @@ class TestMemoryFootprint:
         print(f"  Buffer structure: {buffer_size_mb:.2f}MB")
         print(f"  Total estimate: {total_estimate_mb:.2f}MB")
 
-        assert (
-            total_estimate_mb < 100
-        ), f"Memory footprint {total_estimate_mb:.2f}MB exceeds target (100MB)"
+        assert total_estimate_mb < 100, (
+            f"Memory footprint {total_estimate_mb:.2f}MB exceeds target (100MB)"
+        )
 
     @pytest.mark.asyncio
     async def test_batch_queue_memory_efficiency(self):

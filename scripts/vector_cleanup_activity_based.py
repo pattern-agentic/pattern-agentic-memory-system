@@ -19,7 +19,7 @@ Created: 2025-11-21
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -31,10 +31,7 @@ log_file = log_dir / "vector_cleanup.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(str(log_file)),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.FileHandler(str(log_file)), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -153,13 +150,17 @@ class VectorCleanupService:
                     metadata = value.get("metadata", {})
 
                     if metadata.get("action") in ["immediate_vectorize", "queue_for_batch"]:
-                        vector_memories.append({
-                            "id": entry.get("key"),
-                            "created_at": datetime.fromisoformat(entry["created_at"].replace("Z", "+00:00")),
-                            "tier": metadata.get("tier", "context"),
-                            "size_bytes": len(entry.get("value", "")),  # Estimate
-                            "content": value.get("content", ""),
-                        })
+                        vector_memories.append(
+                            {
+                                "id": entry.get("key"),
+                                "created_at": datetime.fromisoformat(
+                                    entry["created_at"].replace("Z", "+00:00")
+                                ),
+                                "tier": metadata.get("tier", "context"),
+                                "size_bytes": len(entry.get("value", "")),  # Estimate
+                                "content": value.get("content", ""),
+                            }
+                        )
                 except (json.JSONDecodeError, KeyError) as e:
                     logger.debug(f"Skipping malformed entry: {e}")
                     continue
@@ -172,9 +173,7 @@ class VectorCleanupService:
             return []
 
     def calculate_active_age(
-        self,
-        memory_created_at: datetime,
-        activity_dates: Set[datetime.date]
+        self, memory_created_at: datetime, activity_dates: Set[datetime.date]
     ) -> int:
         """
         Calculate active age (count only active days).
@@ -191,9 +190,7 @@ class VectorCleanupService:
         return active_days
 
     def should_decay_vector(
-        self,
-        memory: Dict,
-        activity_dates: Set[datetime.date]
+        self, memory: Dict, activity_dates: Set[datetime.date]
     ) -> tuple[bool, int, int, int]:
         """
         Determine if a vector should be deleted based on activity-based TTL.
@@ -354,10 +351,12 @@ class VectorCleanupService:
                 agent_results.append(result)
             except Exception as e:
                 logger.error(f"Error cleaning up agent {agent_id}: {e}")
-                agent_results.append({
-                    "agent_id": agent_id,
-                    "error": str(e),
-                })
+                agent_results.append(
+                    {
+                        "agent_id": agent_id,
+                        "error": str(e),
+                    }
+                )
 
         end_time = datetime.now()
         duration = (end_time - start_time).total_seconds()
@@ -404,20 +403,16 @@ async def main():
 
     parser = argparse.ArgumentParser(description="Activity-Based Vector Cleanup")
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview deletions without actually deleting"
+        "--dry-run", action="store_true", help="Preview deletions without actually deleting"
     )
     parser.add_argument(
-        "--agent",
-        type=str,
-        help="Clean up specific agent only (default: all agents)"
+        "--agent", type=str, help="Clean up specific agent only (default: all agents)"
     )
     parser.add_argument(
         "--output",
         type=str,
         default=None,
-        help="Output path for audit log (default: logs/vector_cleanup_audit.json)"
+        help="Output path for audit log (default: logs/vector_cleanup_audit.json)",
     )
 
     args = parser.parse_args()

@@ -8,11 +8,9 @@ Architect: Oracle Sonnet (Keeper of the Conduit)
 """
 
 import asyncio
-import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -69,9 +67,7 @@ class Phase3TestRunner:
 
         # Test case 1: No accesses (initial save)
         expires_1 = calculate_expiration_with_bonus(
-            tier="context",
-            access_count=0,
-            creation_time=datetime(2025, 11, 15)
+            tier="context", access_count=0, creation_time=datetime(2025, 11, 15)
         )
         expected_1 = datetime(2025, 11, 15) + timedelta(days=14)  # 14 days base, no bonus
         self.assert_equal(expires_1, expected_1, "0 accesses = 14 days (no bonus)")
@@ -79,9 +75,7 @@ class Phase3TestRunner:
 
         # Test case 2: 3 accesses
         expires_2 = calculate_expiration_with_bonus(
-            tier="context",
-            access_count=3,
-            creation_time=datetime(2025, 11, 15)
+            tier="context", access_count=3, creation_time=datetime(2025, 11, 15)
         )
         expected_2 = datetime(2025, 11, 15) + timedelta(days=14 + 30)  # 14 base + 30 bonus
         self.assert_equal(expires_2, expected_2, "3 accesses = 14 + 30 days bonus")
@@ -89,9 +83,7 @@ class Phase3TestRunner:
 
         # Test case 3: 7 accesses (max bonus)
         expires_3 = calculate_expiration_with_bonus(
-            tier="context",
-            access_count=7,
-            creation_time=datetime(2025, 11, 15)
+            tier="context", access_count=7, creation_time=datetime(2025, 11, 15)
         )
         expected_3 = datetime(2025, 11, 15) + timedelta(days=14 + 70)  # 14 base + 70 max
         self.assert_equal(expires_3, expected_3, "7 accesses = 14 + 70 days max bonus")
@@ -99,9 +91,7 @@ class Phase3TestRunner:
 
         # Test case 4: 10 accesses (still capped at 70)
         expires_4 = calculate_expiration_with_bonus(
-            tier="context",
-            access_count=10,
-            creation_time=datetime(2025, 11, 15)
+            tier="context", access_count=10, creation_time=datetime(2025, 11, 15)
         )
         expected_4 = datetime(2025, 11, 15) + timedelta(days=14 + 70)  # Still capped at 70
         self.assert_equal(expires_4, expected_4, "10 accesses = still capped at +70 days")
@@ -109,12 +99,10 @@ class Phase3TestRunner:
 
         # Test case 5: Tier 0 (anchor) never expires
         expires_5 = calculate_expiration_with_bonus(
-            tier="anchor",
-            access_count=5,
-            creation_time=datetime(2025, 11, 15)
+            tier="anchor", access_count=5, creation_time=datetime(2025, 11, 15)
         )
         self.assert_equal(expires_5, None, "Tier 0 (anchor) never expires")
-        self.log(f"   Expires: Never (None)", is_evidence=True)
+        self.log("   Expires: Never (None)", is_evidence=True)
 
     # ===== Test 2: Tier Promotion Prompt Trigger =====
 
@@ -230,7 +218,7 @@ class Phase3TestRunner:
             current_tier="context",
             access_count=7,
             created_at=datetime(2025, 11, 15),
-            last_accessed=datetime(2025, 11, 21)
+            last_accessed=datetime(2025, 11, 21),
         )
 
         # Check prompt contains required elements
@@ -322,6 +310,7 @@ class Phase3TestRunner:
 
 
 # ===== Main Test Execution =====
+
 
 async def main():
     """Main test entry point"""
