@@ -107,10 +107,7 @@ class H200TierClassifier:
         # Check these FIRST before other tiers to avoid misclassification
         strong_tier3_indicators = ["working on", "wip", "todo", "in progress", "current status"]
         if any(indicator in content_lower for indicator in strong_tier3_indicators):
-            if context.get("ephemeral") or "temporary" in content_lower:
-                return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_24HOURS
-            else:
-                return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_7DAYS
+            return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_14DAYS
 
         # Tier 0: Identity anchors (never decay)
         tier0_score = sum(1 for kw in self.tier0_keywords if kw in content_lower)
@@ -127,14 +124,10 @@ class H200TierClassifier:
         if tier2_score >= 1 or context.get("is_proven_solution"):
             return MemoryTier.TIER2_SOLUTION, DecayFunction.STALENESS_6MONTHS
 
-        # Tier 3: Context/WIP (rapid decay)
+        # Tier 3: Context/WIP (rapid decay - 14 days)
         tier3_score = sum(1 for kw in self.tier3_keywords if kw in content_lower)
         if tier3_score >= 1 or context.get("is_temporary"):
-            # Check if it's very ephemeral (24-hour decay) or just rapid (7-day)
-            if context.get("ephemeral") or "temporary" in content_lower:
-                return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_24HOURS
-            else:
-                return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_7DAYS
+            return MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_14DAYS
 
         # Default: Tier 2 solution (most common case)
         return MemoryTier.TIER2_SOLUTION, DecayFunction.STALENESS_6MONTHS
@@ -145,7 +138,7 @@ class H200TierClassifier:
             "anchor": (MemoryTier.TIER0_ANCHOR, DecayFunction.NEVER),
             "principle": (MemoryTier.TIER1_PRINCIPLE, DecayFunction.SUPERSEDED_ONLY),
             "solution": (MemoryTier.TIER2_SOLUTION, DecayFunction.STALENESS_6MONTHS),
-            "context": (MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_7DAYS),
+            "context": (MemoryTier.TIER3_CONTEXT, DecayFunction.RAPID_14DAYS),
         }
         return tier_map.get(
             tier_value, (MemoryTier.TIER2_SOLUTION, DecayFunction.STALENESS_6MONTHS)

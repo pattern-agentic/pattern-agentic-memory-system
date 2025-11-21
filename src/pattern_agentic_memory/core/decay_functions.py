@@ -12,20 +12,19 @@ from typing import Optional
 class DecayFunction(Enum):
     """Decay strategies for different memory tiers"""
 
-    NEVER = "never"  # Tier 0
-    SUPERSEDED_ONLY = "superseded_only"  # Tier 1
-    STALENESS_6MONTHS = "staleness_6months"  # Tier 2
-    RAPID_7DAYS = "rapid_7days"  # Tier 3
-    RAPID_24HOURS = "rapid_24hours"  # Tier 3 (ephemeral)
+    NEVER = "never"  # Tier 0: Forever
+    SUPERSEDED_ONLY = "superseded_only"  # Tier 1: 6 months
+    STALENESS_6MONTHS = "staleness_6months"  # Tier 2: 1 month
+    RAPID_14DAYS = "rapid_14days"  # Tier 3: 14 days (renamed from RAPID_7DAYS)
 
 
-# Decay policy mapping
+# Decay policy mapping (Updated 2025-11-20: Activity-based TTL alignment)
+# Tiers: Forever, 180 days (6mo), 30 days (1mo), 14 days
 DECAY_POLICY_MAP = {
-    DecayFunction.NEVER: None,  # Never expires
-    DecayFunction.SUPERSEDED_ONLY: None,  # Manual removal only
-    DecayFunction.STALENESS_6MONTHS: timedelta(days=180),
-    DecayFunction.RAPID_7DAYS: timedelta(days=7),
-    DecayFunction.RAPID_24HOURS: timedelta(hours=24),
+    DecayFunction.NEVER: None,  # Tier 0: Forever (anchor/identity)
+    DecayFunction.SUPERSEDED_ONLY: timedelta(days=180),  # Tier 1: 6 months
+    DecayFunction.STALENESS_6MONTHS: timedelta(days=30),  # Tier 2: 1 month
+    DecayFunction.RAPID_14DAYS: timedelta(days=14),  # Tier 3: 14 days
 }
 
 
